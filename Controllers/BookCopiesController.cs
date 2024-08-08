@@ -31,7 +31,8 @@ namespace LibraryAPI.Controllers
           {
               return NotFound();
           }
-            return await _context.BookCopy.ToListAsync();
+            var book = await _context.BookCopy.Include(b=> b.Book).ToListAsync();
+            return book;
         }
 
         // GET: api/BookCopies/5
@@ -43,7 +44,7 @@ namespace LibraryAPI.Controllers
           {
               return NotFound();
           }
-            var bookCopy = await _context.BookCopy.FindAsync(id);
+            var bookCopy = await _context.BookCopy.Include(b=> b.Book).FirstOrDefaultAsync(a=>a.Id==id);
 
             if (bookCopy == null)
             {
