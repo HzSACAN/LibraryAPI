@@ -43,7 +43,8 @@ namespace LibraryAPI.Controllers
           {
               return NotFound();
           }
-            return await _context.Member.ToListAsync();
+            var members = await _context.Member.Include(m => m.ApplicationUser).ToListAsync();
+            return members;
         }
 
         // GET: api/Members/5
@@ -57,7 +58,7 @@ namespace LibraryAPI.Controllers
           }
             var selfId= User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var member = await _context.Member.FindAsync(selfId);
+            var member = await _context.Member.Include(m=>m.ApplicationUser).FirstOrDefaultAsync(m=> m.Id==selfId);
 
             return member!;
         }

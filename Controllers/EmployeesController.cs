@@ -42,7 +42,8 @@ namespace LibraryAPI.Controllers
           {
               return NotFound();
           }
-            return await _context.Employee.ToListAsync();
+            var employee = await _context.Employee.Include(x => x.ApplicationUser).ToListAsync();
+            return employee;
         }
 
         // GET: api/Employees/5
@@ -55,7 +56,7 @@ namespace LibraryAPI.Controllers
               return NotFound();
           }
             var selfId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var employee = await _context.Employee.FindAsync(selfId);
+            var employee = await _context.Employee.Include(m=> m.ApplicationUser).FirstOrDefaultAsync(c=> c.Id==selfId);
 
             return employee!;
         }
