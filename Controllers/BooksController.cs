@@ -109,8 +109,6 @@ namespace LibraryAPI.Controllers
           }
             var location = await _context.Location.FindAsync(book.LocationShelf);
             var publisher = await _context.Publisher!.FindAsync(book.Publisher);
-
-            // alttaki üçü null gelebilir aratablo controllerlarında doldurulabilirler
            
             if (location != null && location.IsDeleted || publisher!= null && publisher.IsDeleted )
             {
