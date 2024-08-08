@@ -168,7 +168,11 @@ namespace LibraryAPI.Controllers
             {
                 return NotFound();
             }
-
+            var roles = await _userManager.GetRolesAsync(member);
+            if (!roles.Contains("Member"))
+            {
+                return Forbid(); // Kullanıcının rolü "Member" değilse yapmayacak
+            }
             member.IsDeleted = true;
             await _context.SaveChangesAsync();
 

@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Diagnostics.Metrics;
 
 namespace LibraryAPI.Controllers
 {
@@ -162,7 +163,11 @@ namespace LibraryAPI.Controllers
             {
                 return NotFound();
             }
-
+            var roles = await _userManager.GetRolesAsync(employee);
+            if (!roles.Contains("Employee"))
+            {
+                return Forbid(); 
+            }
             employee.IsDeleted = true;
             await _context.SaveChangesAsync();
 
