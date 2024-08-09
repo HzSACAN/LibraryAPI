@@ -16,7 +16,7 @@ namespace LibraryAPI
             LibraryAPIContext _context;
             RoleManager<IdentityRole> _roleManager;
             UserManager<ApplicationUser> _userManager;
-            IdentityRole identityRole; 
+            IdentityRole identityRole;
             ApplicationUser applicationUser;
 
 
@@ -99,7 +99,10 @@ namespace LibraryAPI
             _roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             _userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
+
             _context.Database.Migrate();
+
+
 
             if (_roleManager.FindByNameAsync("Admin").Result == null)
             {
