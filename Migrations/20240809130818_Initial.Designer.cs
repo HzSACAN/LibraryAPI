@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryAPI.Migrations
 {
     [DbContext(typeof(LibraryAPIContext))]
-    [Migration("20240726154634_Initialized")]
-    partial class Initialized
+    [Migration("20240809130818_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,6 +58,9 @@ namespace LibraryAPI.Migrations
 
                     b.Property<long>("IdNumber")
                         .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -140,6 +143,9 @@ namespace LibraryAPI.Migrations
                         .HasMaxLength(800)
                         .HasColumnType("nvarchar(800)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("Author");
@@ -179,6 +185,9 @@ namespace LibraryAPI.Migrations
                         .HasMaxLength(13)
                         .HasColumnType("varchar(13)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LocationShelf")
                         .IsRequired()
                         .HasMaxLength(6)
@@ -196,8 +205,8 @@ namespace LibraryAPI.Migrations
                     b.Property<short>("PublishingYear")
                         .HasColumnType("smallint");
 
-                    b.Property<float>("Rating")
-                        .HasColumnType("real");
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -225,6 +234,9 @@ namespace LibraryAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
@@ -282,7 +294,10 @@ namespace LibraryAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("EmployeesId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsReturn")
                         .HasColumnType("bit");
@@ -297,6 +312,8 @@ namespace LibraryAPI.Migrations
 
                     b.HasIndex("BookCopiesId");
 
+                    b.HasIndex("EmployeesId");
+
                     b.HasIndex("MembersId");
 
                     b.ToTable("BorrowBook");
@@ -309,6 +326,9 @@ namespace LibraryAPI.Migrations
                         .HasColumnType("smallint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"), 1L, 1);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -350,6 +370,9 @@ namespace LibraryAPI.Migrations
                         .HasMaxLength(3)
                         .HasColumnType("char(3)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -365,6 +388,9 @@ namespace LibraryAPI.Migrations
                     b.Property<string>("Shelf")
                         .HasMaxLength(6)
                         .HasColumnType("varchar(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.HasKey("Shelf");
 
@@ -400,6 +426,9 @@ namespace LibraryAPI.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("varchar(320)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(800)
@@ -415,6 +444,24 @@ namespace LibraryAPI.Migrations
                     b.ToTable("Publisher");
                 });
 
+            modelBuilder.Entity("LibraryAPI.Models.Rating", b =>
+                {
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MemberId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<byte>("Rate")
+                        .HasColumnType("tinyint");
+
+                    b.HasKey("BookId", "MemberId");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("Rating");
+                });
+
             modelBuilder.Entity("LibraryAPI.Models.SubCategory", b =>
                 {
                     b.Property<short>("Id")
@@ -425,6 +472,9 @@ namespace LibraryAPI.Migrations
 
                     b.Property<short>("CategoryId")
                         .HasColumnType("smallint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -648,7 +698,7 @@ namespace LibraryAPI.Migrations
                         .IsRequired();
 
                     b.HasOne("LibraryAPI.Models.SubCategory", "SubCategory")
-                        .WithMany("BookSubCategories")
+                        .WithMany()
                         .HasForeignKey("SubCategoriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -666,11 +716,17 @@ namespace LibraryAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LibraryAPI.Models.Employee", "Employees")
+                        .WithMany()
+                        .HasForeignKey("EmployeesId");
+
                     b.HasOne("LibraryAPI.Models.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MembersId");
 
                     b.Navigation("BookCopy");
+
+                    b.Navigation("Employees");
 
                     b.Navigation("Member");
                 });
@@ -695,6 +751,25 @@ namespace LibraryAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("LibraryAPI.Models.Rating", b =>
+                {
+                    b.HasOne("LibraryAPI.Models.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LibraryAPI.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("LibraryAPI.Models.SubCategory", b =>
@@ -791,11 +866,6 @@ namespace LibraryAPI.Migrations
             modelBuilder.Entity("LibraryAPI.Models.Publisher", b =>
                 {
                     b.Navigation("Books");
-                });
-
-            modelBuilder.Entity("LibraryAPI.Models.SubCategory", b =>
-                {
-                    b.Navigation("BookSubCategories");
                 });
 #pragma warning restore 612, 618
         }

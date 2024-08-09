@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LibraryAPI.Migrations
 {
-    public partial class Initialized : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -37,6 +37,7 @@ namespace LibraryAPI.Migrations
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RegisterDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<byte>(type: "tinyint", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -66,7 +67,8 @@ namespace LibraryAPI.Migrations
                     FullName = table.Column<string>(type: "nvarchar(800)", maxLength: 800, nullable: false),
                     Biography = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     BirthYear = table.Column<short>(type: "smallint", nullable: false),
-                    DeathYear = table.Column<short>(type: "smallint", nullable: true)
+                    DeathYear = table.Column<short>(type: "smallint", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -79,7 +81,8 @@ namespace LibraryAPI.Migrations
                 {
                     Id = table.Column<short>(type: "smallint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "varchar(800)", maxLength: 800, nullable: false)
+                    Name = table.Column<string>(type: "varchar(800)", maxLength: 800, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,7 +94,8 @@ namespace LibraryAPI.Migrations
                 columns: table => new
                 {
                     Code = table.Column<string>(type: "char(3)", maxLength: 3, nullable: false),
-                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -102,7 +106,8 @@ namespace LibraryAPI.Migrations
                 name: "Location",
                 columns: table => new
                 {
-                    Shelf = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false)
+                    Shelf = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -118,7 +123,8 @@ namespace LibraryAPI.Migrations
                     Name = table.Column<string>(type: "nvarchar(800)", maxLength: 800, nullable: false),
                     Phone = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: false),
                     Email = table.Column<string>(type: "varchar(320)", maxLength: 320, nullable: true),
-                    ContactPerson = table.Column<string>(type: "nvarchar(800)", maxLength: 800, nullable: true)
+                    ContactPerson = table.Column<string>(type: "nvarchar(800)", maxLength: 800, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -277,7 +283,8 @@ namespace LibraryAPI.Migrations
                     Id = table.Column<short>(type: "smallint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "varchar(800)", maxLength: 800, nullable: false),
-                    CategoryId = table.Column<short>(type: "smallint", nullable: false)
+                    CategoryId = table.Column<short>(type: "smallint", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -303,8 +310,9 @@ namespace LibraryAPI.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", maxLength: 5000, nullable: true),
                     PrintCount = table.Column<int>(type: "int", nullable: false),
                     Banned = table.Column<bool>(type: "bit", nullable: false),
-                    Rating = table.Column<float>(type: "real", nullable: false),
+                    Rating = table.Column<double>(type: "float", nullable: false),
                     PublisherId = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     LocationShelf = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false)
                 },
                 constraints: table =>
@@ -355,7 +363,8 @@ namespace LibraryAPI.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BooksId = table.Column<int>(type: "int", nullable: false),
-                    IsAvailable = table.Column<bool>(type: "bit", nullable: false)
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -389,6 +398,31 @@ namespace LibraryAPI.Migrations
                         column: x => x.LanguagesCode,
                         principalTable: "Language",
                         principalColumn: "Code",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rating",
+                columns: table => new
+                {
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    MemberId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Rate = table.Column<byte>(type: "tinyint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rating", x => new { x.BookId, x.MemberId });
+                    table.ForeignKey(
+                        name: "FK_Rating_Book_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Book",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Rating_Member_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "Member",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -428,7 +462,8 @@ namespace LibraryAPI.Migrations
                     DueTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ReturnTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsReturn = table.Column<bool>(type: "bit", nullable: false),
-                    EmployeesId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    EmployeesId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -439,6 +474,11 @@ namespace LibraryAPI.Migrations
                         principalTable: "BookCopy",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BorrowBook_Employee_EmployeesId",
+                        column: x => x.EmployeesId,
+                        principalTable: "Employee",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_BorrowBook_Member_MembersId",
                         column: x => x.MembersId,
@@ -516,9 +556,19 @@ namespace LibraryAPI.Migrations
                 column: "BookCopiesId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BorrowBook_EmployeesId",
+                table: "BorrowBook",
+                column: "EmployeesId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BorrowBook_MembersId",
                 table: "BorrowBook",
                 column: "MembersId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rating_MemberId",
+                table: "Rating",
+                column: "MemberId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubCategory_CategoryId",
@@ -558,7 +608,7 @@ namespace LibraryAPI.Migrations
                 name: "BorrowBook");
 
             migrationBuilder.DropTable(
-                name: "Employee");
+                name: "Rating");
 
             migrationBuilder.DropTable(
                 name: "SubCategoryBook");
@@ -574,6 +624,9 @@ namespace LibraryAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "BookCopy");
+
+            migrationBuilder.DropTable(
+                name: "Employee");
 
             migrationBuilder.DropTable(
                 name: "Member");

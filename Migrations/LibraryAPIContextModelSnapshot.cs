@@ -696,7 +696,7 @@ namespace LibraryAPI.Migrations
                         .IsRequired();
 
                     b.HasOne("LibraryAPI.Models.SubCategory", "SubCategory")
-                        .WithMany("BookSubCategories")
+                        .WithMany()
                         .HasForeignKey("SubCategoriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -864,11 +864,6 @@ namespace LibraryAPI.Migrations
             modelBuilder.Entity("LibraryAPI.Models.Publisher", b =>
                 {
                     b.Navigation("Books");
-                });
-
-            modelBuilder.Entity("LibraryAPI.Models.SubCategory", b =>
-                {
-                    b.Navigation("BookSubCategories");
                 });
 #pragma warning restore 612, 618
         }
